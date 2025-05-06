@@ -1,0 +1,106 @@
+1. import library dan dataset
+Source code :	from sklearn.tree import DecisionTreeRegressor
+		import kagglehub
+		import os
+		import pandas as pd
+		from sklearn.model_selection import train_test_split
+		from sklearn.tree import DecisionTreeClassifier, plot_tree
+		import matplotlib.pyplot as plt
+
+Penjelasan:
+sklearn.tree.DecisionTreeRegressor & DecisionTreeClassifier Digunakan untuk membangun model pohon keputusan.
+Regressor digunakan untuk memprediksi nilai kontinu seperti harga, sedangkan Classifier digunakan untuk klasifikasi seperti menentukan apakah pasar akan naik atau turun.
+Kenapa DecisionTree?
+Karena model ini mudah diinterpretasikan, cepat untuk dataset berukuran kecil hingga menengah, dan tidak memerlukan normalisasi data seperti model lain (misalnya SVM atau KNN).
+kagglehub digunakan untuk mengakses dataset dari Kaggle secara langsung. Ini lebih praktis dibandingkan harus mengunduh file secara manual dan mengunggahnya ke lingkungan notebook.
+
+- Kenapa pakai os dan pandas?
+os dipakai untuk membangun path file secara fleksibel lintas sistem operasi.
+pandas adalah library utama dalam analisis data karena mendukung manipulasi dan eksplorasi data yang cepat dan efisien melalui struktur DataFrame.
+
+2. Menentukan Path Dataset
+Source Code :	path = kagglehub.dataset_download("wlwwwlw/bitcoin-pulse-market-trends-and-fear-dataset")
+		print("Path to dataset files:", path)
+
+Penjelasan:
+kagglehub.dataset_download(...) secara otomatis mengunduh dataset dan mengarahkannya ke folder kerja. Ini lebih efisien daripada mendefinisikan path secara manual karena meminimalisir kesalahan penulisan atau lokasi file.
+
+3. Cek Isi Folder Dataset
+Source Code :	dataset_folder = '/kaggle/input/bitcoin-pulse-market-trends-and-fear-dataset'
+		for filename in os.listdir(dataset_folder):
+    		print(filename)
+
+Penjelasan:
+Perintah ini digunakan untuk menampilkan isi folder dataset dan memastikan file yang akan digunakan benar-benar tersedia.
+Ini lebih baik daripada langsung menulis nama file karena bisa menghindari error jika nama file berubah atau tidak sesuai ekspektasi.
+
+4. Tentukan File yang Akan Digunakan
+Source code :	file_path = os.path.join(dataset_folder, 'Bitcoin Pulse  Hourly Dataset from Markets Trends and Fear.csv')
+
+Penjelasan:
+os.path.join() dipakai agar path file dibentuk dengan cara yang aman dan konsisten di berbagai sistem operasi (Windows, Linux, dll).
+
+Ini lebih baik daripada menggunakan penggabungan string seperti 'folder' + '/' + 'file.csv' yang rawan kesalahan path tergantung OS yang digunakan.
+
+5. Membaca dan Menampilkan Dataset
+Source code :	df = pd.read_csv(file_path)
+		print(df.head())
+
+Penjelasan:
+pd.read_csv() digunakan untuk membaca file CSV menjadi DataFrame.
+print(df.head()) digunakan untuk melihat 5 baris pertama sebagai langkah awal eksplorasi data.
+
+6. Melihat nama kolom
+Source Code :	print(df.columns)
+
+Penjelasan:
+Berguna untuk mengetahui struktur dataset, terutama jika ingin memilih kolom tertentu untuk fitur dan target prediksi.
+
+7. Membersihkan data
+Source Code :	df = df.dropna(subset=['XRP_USDT_1h_open', 'XRP_USDT_1h_high', 'XRP_USDT_1h_low', 'XRP_USDT_1h_close'])
+
+Penjelasan:
+dropna(subset=...) digunakan untuk membuang baris dengan nilai kosong di kolom-kolom penting.
+
+Ini penting agar model tidak belajar dari data yang tidak lengkap atau noise.
+
+8. Menentukan Fitur dan Target
+	x = df[['XRP_USDT_1h_open', 'XRP_USDT_1h_high', 'XRP_USDT_1h_low']]
+	y = df['XRP_USDT_1h_close']
+
+Penjelasan:
+x berisi fitur-fitur yang akan digunakan untuk prediksi.
+
+y adalah target (label) yang ingin diprediksi, yaitu harga penutupan (close).
+
+9. Membagi Data untuk Training dan Testing
+	x_train, x_test, y_train, y_test = train_test_split(x, y, test_size=0.2)
+
+Penjelasan:
+Membagi data menjadi 80% untuk pelatihan dan 20% untuk pengujian.
+Ini penting untuk mengevaluasi performa model terhadap data yang belum pernah dilihat sebelumnya.
+
+10. Melatih Model Decision Tree Regressor
+Source Code :	dtree = DecisionTreeRegressor(max_depth=3)
+		dtree.fit(x_train, y_train)
+
+Penjelasan:
+Menggunakan Decision Tree Regressor karena cocok untuk prediksi nilai kontinu.
+max_depth=3 dipilih untuk mencegah overfitting dan membuat pohon lebih sederhana.
+
+11. Mengukur Akurasi Model
+Source Code :	accuracy = dtree.score(x_test, y_test)
+		print(f"Akurasi model: {accuracy*100:.2f}%")
+
+Penjelasan:
+score() menghitung koefisien determinasi R². Nilai mendekati 1 menandakan model sangat baik.
+Dicetak dalam bentuk persentase agar lebih mudah dibaca.
+
+12. Visualisasi Pohon Keputusan
+Source Code :	plt.figure(figsize=(30, 20))
+		plot_tree(dtree, filled=True)
+		plt.show()
+
+Penjelasan:
+Visualisasi ini memberikan gambaran logika pengambilan keputusan dari model.
+filled=True memberikan warna sesuai nilai dan hasil cabang untuk mempermudah interpretasi.
